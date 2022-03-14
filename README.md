@@ -1,5 +1,5 @@
 # SCNet
-Underwater Image Enhancement via Learning Water Type Desensitized Representations. ICASSP 2022.
+Underwater Image Enhancement via Learning Water Type Desensitized Representations. Accepted by ICASSP 2022.
 
 You can run eval.py and to obtain the results using our [pre-trained model](https://pan.baidu.com/s/1sQ_j-6A7EhNPJF7r9KWsRw)(9xwn).
 
