@@ -1,4 +1,3 @@
-
 import os
 import torch
 from torch.utils.data import DataLoader
@@ -42,11 +41,6 @@ device = torch.device(opt.device)
 hostname = str(socket.gethostname())
 cudnn.benchmark = True
 
-best_psnr = 0
-best_epoch_psnr = 0
-best_ssim = 0
-best_epoch_ssim = 0
-
 
 def train(epoch):
     epoch_loss = 0
@@ -68,53 +62,6 @@ def train(epoch):
         print("===> Epoch[{}]({}/{}): Loss: {:.4f} || Learning rate: lr={} || Timer: {:.4f} sec.".format(epoch, iteration, 
                           len(training_data_loader), loss.item(), optimizer.param_groups[0]['lr'], (t1 - t0)))
     print("===> Epoch {} Complete: Avg. Loss: {:.4f}".format(epoch, epoch_loss / len(training_data_loader)))
-
-
-def test(testing_data_loader):
-    global best_psnr
-    global best_epoch_psnr
-    global best_ssim
-    global best_epoch_ssim
-
-    avg_psnr = 0
-    avg_ssim = 0
-
-    torch.set_grad_enabled(False)
-    epoch = scheduler.last_epoch
-    
-    model.eval()
-    
-    print('\nEvaluation:')
-    
-    for batch in testing_data_loader:
-        with torch.no_grad():
-            Input, target, name = batch[0], batch[1], batch[2]
-        if cuda:
-            Input = Input.to(device)
-            target = target.to(device)
-            
-            with torch.no_grad():
-                out = model.forward(Input)
-                prediction = quantize(out, opt.rgb_range)
-                target = quantize(target, opt.rgb_range)
-                psnr, ssim = calc_psnr_ssim(prediction, target)
-                avg_psnr += psnr
-                avg_ssim += ssim
-
-    avg_psnr = avg_psnr / len(testing_data_loader)
-    avg_ssim = avg_ssim / len(testing_data_loader)
-    checkpoint(epoch)
-
-    if avg_psnr >= best_psnr:
-        # checkpoint(epoch)
-        best_epoch_psnr = epoch
-        best_psnr = avg_psnr
-    if avg_ssim >= best_ssim:
-        best_epoch_ssim = epoch
-        best_ssim = avg_ssim
-    print("===> Avg.PSNR: {:.4f} dB ||  Best.PSNR: {:.4f} dB || Epoch: {}".format(avg_psnr, best_psnr, best_epoch_psnr))
-    print("===> Avg.SSIM: {:.4f} dB ||  Best.SSIM: {:.4f} dB || Epoch: {}".format(avg_ssim, best_ssim, best_epoch_ssim))
-    torch.set_grad_enabled(True)
 
 
 def checkpoint(epoch):
@@ -164,6 +111,6 @@ for epoch in range(opt.start_iter, opt.nEpochs + 1):
     scheduler.step()
 
     if (epoch+1) % opt.snapshots == 0:
-        test(testing_data_loader)
+        checkpoint(epoch)
 
 
