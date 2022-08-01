@@ -1,7 +1,7 @@
 import os
 import torch
 from torch.utils.data import DataLoader
-from net_wosn import Net
+from net import Net
 import argparse
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
